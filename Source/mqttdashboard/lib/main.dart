@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:async';
+import 'dart:convert';
 
 void main() => runApp(MyApp());
 
@@ -36,6 +39,7 @@ const MaterialColor body_background = const MaterialColor(
     }
 );
 
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -58,11 +62,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  //vars that use for communicat with MQTT broker
   String broker           = '192.168.1.6';
   int port                = 1883;
+  String port_string;
   String username         = '';
   String passwd           = '';
   String clientIdentifier = 'android';
+  //JSon file read
+  List settings_broker_data;
+  Future<String> loadJsonData() async{
+    var data_from_Json_as_string= await rootBundle.loadString('assets/broker_info.json');
+    Map<String, dynamic> data_from_Json = jsonDecode(data_from_Json_as_string);
+    //print('broker_ip is, ${user['broker_ip']}!');
+    broker           = data_from_Json['broker_ip'];
+    port_string=data_from_Json['port'];
+    port                = int.parse(data_from_Json['port']); //just convert here from string to int
+    username         = data_from_Json['username'];
+    passwd           = data_from_Json['passwd'];
+    clientIdentifier = data_from_Json['clientIdentifier'];
+
+  }
+
+@override
+void initState(){
+    this.loadJsonData();
+}
 
   mqtt.MqttClient client;
   mqtt.MqttConnectionState connectionState;
@@ -117,8 +143,34 @@ class _MyHomePageState extends State<MyHomePage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
         children: <Widget>[
-          IconButton(color: Colors.black54,icon: Icon(Icons.menu), onPressed: () {},),
-          IconButton(color: Colors.black54,icon: Icon(Icons.info), onPressed: () {},),
+          IconButton(
+            color: Colors.black54,
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (_) => new AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20.0))
+                    ),
+                    title: new Text("broker settings"),
+                    content: new Text(""),
+                  )
+              );
+            },
+          ),
+          IconButton(color: Colors.black54,icon: Icon(Icons.info), onPressed: () {
+            showDialog(
+                context: context,
+                builder: (_) => new AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0))
+                  ),
+                  title: new Text("About"),
+                  content: new Text("open source MQTT dashboard application developed by Walid Amriou"),
+                )
+            );
+          },),
         ],
       ),
     ),
@@ -236,3 +288,40 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 }
+
+
+Future<String> _asyncInputDialog(BuildContext context) async {
+  String teamName = '';
+  return showDialog<String>(
+    context: context,
+    barrierDismissible: false, // dialog is dismissible with a tap on the barrier
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Enter current team'),
+        content: new Row(
+          children: <Widget>[
+            new Expanded(
+                child: new TextField(
+                  autofocus: true,
+                  decoration: new InputDecoration(
+                      labelText: 'Team Name', hintText: 'eg. Juventus F.C.'),
+                  onChanged: (value) {
+                    teamName = value;
+                  },
+                ))
+          ],
+        ),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Ok'),
+            onPressed: () {
+              Navigator.of(context).pop(teamName);
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
