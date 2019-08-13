@@ -1,6 +1,6 @@
-# mqttdashboard
+# MQTTReceive
 
-MQTTdashboard
+MQTT Receive
 
 ## Getting Started
 

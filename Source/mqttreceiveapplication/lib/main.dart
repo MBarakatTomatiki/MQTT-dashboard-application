@@ -44,9 +44,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MQTT dashboard',
+      title: 'MQTT Receive',
       debugShowCheckedModeBanner:false, //to remove the red debug banner
-      home: MyHomePage(title: 'MQTT dashboard'),
+      home: MyHomePage(title: 'MQTT Receive'),
     );
   }
 }
@@ -64,12 +64,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   //vars that use for communicat with MQTT broker
-  String broker           = '192.168.1.6';
-  int port                = 1883;
+  String broker;
+  int port;
   String port_string;
-  String username         = '';
-  String passwd           = '';
-  String clientIdentifier = 'android';
+  String username;
+  String passwd;
+  String clientIdentifier;
+  String topic_string;
   //JSon file read
   List settings_broker_data;
   Future<String> loadJsonData() async{
@@ -82,6 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
     username         = data_from_Json['username'];
     passwd           = data_from_Json['passwd'];
     clientIdentifier = data_from_Json['clientIdentifier'];
+    topic_string = data_from_Json['topic'];
 
   }
 
@@ -115,14 +117,14 @@ void initState(){
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-
+      backgroundColor:Colors.black54,
       appBar: AppBar(
         backgroundColor: Colors_of_the_app,
         title: Text(widget.title),
       ),
 
-      body: Center(
-        child: Text(message_display), //this print the messegers
+      body: Center(  
+        child: Text(message_display,style: TextStyle(color: Colors.white,fontSize: 40),),//this print the messegers
         ),
 
       floatingActionButton: FloatingActionButton(
@@ -154,7 +156,34 @@ void initState(){
                         borderRadius: BorderRadius.all(Radius.circular(20.0))
                     ),
                     title: new Text("broker settings"),
-                    content: new Text(""),
+                    content: new Text("current settings: \n "+
+                    "broker ip/server:"+
+                    broker+
+                    " \n "+
+                    "port:"+
+                    port_string+
+                    " \n "+
+                    " username: "+
+                    username+
+                    " \n "+
+                    "Password: "+
+                    passwd+
+                    " \n "+
+                    "clientIdentifier: "+
+                    clientIdentifier+
+                    " \n "+
+                    "topic: "+
+                    topic_string),
+                  
+                  actions: <Widget>[
+                    FlatButton(
+                     child: Text('change the settings',textAlign: TextAlign.center,),
+                     onPressed: () {},
+                    ),],
+
+
+
+
                   )
               );
             },
@@ -166,11 +195,21 @@ void initState(){
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(20.0))
                   ),
-                  title: new Text("About"),
-                  content: new Text("open source MQTT dashboard application developed by Walid Amriou"),
+                  title: new Text("About",textAlign: TextAlign.center,),
+                  content:new Text("open source MQTT Receive application"+
+                   " \n "+
+                   "for test the reveive from topic"+ 
+                   "\n"+
+                   "developed by Walid Amriou"+ 
+                   "\n"+
+                   "www.walidamriou.com"+ 
+                   "\n"+
+                   "github.com/walidamriou"+ 
+                   "\n",style: TextStyle(color: Colors.black54,fontSize: 16),textAlign: TextAlign.center,),
                 )
             );
-          },),
+          },
+          ),
         ],
       ),
     ),
@@ -246,7 +285,7 @@ void initState(){
     /// notifications of published updates to each subscribed topic.
     subscription = client.updates.listen(_onMessage);
 
-    _subscribeToTopic("broker/counter");
+    _subscribeToTopic(topic_string);
   }
 
   void _disconnect() {
@@ -323,5 +362,4 @@ Future<String> _asyncInputDialog(BuildContext context) async {
     },
   );
 }
-
 

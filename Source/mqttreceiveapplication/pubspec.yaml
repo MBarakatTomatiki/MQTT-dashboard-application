@@ -1,5 +1,5 @@
-name: mqttdashboard
-description: MQTTdashboard
+name: MQTTReceive
+description: MQTT Receive is Mobile application for test the reveive from topic & broker. devlopered by Walid Amriou
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
